@@ -190,20 +190,42 @@ export default function App() {
             {/* Pilihan surah untuk bacaan. Pengajar dapat memilih surah mana yang akan dibaca siswa. */}
             <h3 className="text-lg font-semibold">Pilih Surah</h3>
             {surahList.length === 0 ? (
+              // Ketika daftar surah belum dimuat, tampilkan pesan loading.
               <p className="text-sm text-gray-500">Memuat daftar surah...</p>
             ) : (
-              <select
-                className="w-full p-2 border border-gray-300 rounded"
-                value={selectedSurah}
-                onChange={(e) => setSelectedSurah(e.target.value)}
-              >
-                {surahList.map((surah) => (
-                  <option key={surah.number} value={String(surah.number)}>
-                    {surah.number}. {surah.englishName}
-                  </option>
-                ))}
-              </select>
+              // Tampilkan daftar surah sebagai tombol-tombol. Surah yang dipilih akan disorot.
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-56 overflow-y-auto">
+                {surahList.map((surah) => {
+                  const surahNumber = String(surah.number);
+                  const isActive = selectedSurah === surahNumber;
+                  return (
+                    <button
+                      key={surah.number}
+                      type="button"
+                      className={`text-left px-3 py-2 rounded border text-sm ${
+                        isActive
+                          ? 'bg-green-600 text-white border-green-700'
+                          : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100'
+                      }`}
+                      onClick={() => setSelectedSurah(surahNumber)}
+                    >
+                      {surah.number}. {surah.englishName}
+                    </button>
+                  );
+                })}
+              </div>
             )}
+
+            {/* Tampilkan teks bacaan setelah surah dipilih. Jika belum ada, tampilkan pesan loading. */}
+            <div className="mt-3">
+              {readingText ? (
+                <div className="p-3 border border-gray-300 rounded bg-gray-50 whitespace-pre-line max-h-64 overflow-y-auto">
+                  {readingText}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">Memuat bacaan...</p>
+              )}
+            </div>
             {/* Test selection allows instructors to present reading material for each assessment type. */}
             <h3 className="text-lg font-semibold">Pilih Tes</h3>
             <div className="flex flex-wrap gap-2">
@@ -241,11 +263,8 @@ export default function App() {
                 Kelancaran
               </button>
             </div>
-            {selectedTest && (
-              <div className="mt-3 p-3 border border-gray-300 rounded bg-gray-50 whitespace-pre-line">
-                {readingText || "Memuat bacaan..."}
-              </div>
-            )}
+            {/* Teks bacaan dari surah yang dipilih akan selalu ditampilkan di bawah daftar surah. */}
+
 
             <h3 className="text-lg font-semibold mt-4">Nilai Tes</h3>
             {/* Grid for three test inputs */}
