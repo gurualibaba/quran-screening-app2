@@ -31,6 +31,37 @@ export default function App() {
   // Local history of previous assessments
   const [history, setHistory] = useState([]);
 
+  // Currently selected test for displaying reading material. Can be
+  // "makhraj", "tajwid" or "kelancaran" or null when no test is selected.
+  const [selectedTest, setSelectedTest] = useState(null);
+
+  // Reading materials for each test. These short surah excerpts can be
+  // replaced with any verses you prefer to use during assessment. They
+  // provide text for students to read so teachers can evaluate their
+  // pronunciation, tajwid and fluency.
+  const readingMaterials = {
+    makhraj: `Bacaan untuk tes Makharijul Huruf:\n\n` +
+      `بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n` +
+      `الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ\n` +
+      `الرَّحْمَٰنِ الرَّحِيمِ\n` +
+      `مَالِكِ يَوْمِ الدِّينِ\n` +
+      `إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ\n` +
+      `اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ\n` +
+      `صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ`,
+    tajwid: `Bacaan untuk tes Tajwid:\n\n` +
+      `قُلْ هُوَ اللَّهُ أَحَدٌ\n` +
+      `اللَّهُ الصَّمَدُ\n` +
+      `لَمْ يَلِدْ وَلَمْ يُولَدْ\n` +
+      `وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ`,
+    kelancaran: `Bacaan untuk tes Kelancaran:\n\n` +
+      `قُلْ أَعُوذُ بِرَبِّ النَّاسِ\n` +
+      `مَلِكِ النَّاسِ\n` +
+      `إِلَٰهِ النَّاسِ\n` +
+      `مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ\n` +
+      `الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ\n` +
+      `مِنَ الْجِنَّةِ وَالنَّاسِ`,
+  };
+
   // Simple login handler; for a production app this would
   // authenticate against a backend. Here we just check that
   // both fields are filled in.
@@ -134,7 +165,50 @@ export default function App() {
               value={className}
               onChange={(e) => setClassName(e.target.value)}
             />
-            <h3 className="text-lg font-semibold">Nilai Tes</h3>
+            {/* Test selection allows instructors to present reading material for each assessment type. */}
+            <h3 className="text-lg font-semibold">Pilih Tes</h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className={`px-4 py-2 rounded ${
+                  selectedTest === "makhraj"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
+                onClick={() => setSelectedTest("makhraj")}
+              >
+                Makharijul Huruf
+              </button>
+              <button
+                type="button"
+                className={`px-4 py-2 rounded ${
+                  selectedTest === "tajwid"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
+                onClick={() => setSelectedTest("tajwid")}
+              >
+                Tajwid
+              </button>
+              <button
+                type="button"
+                className={`px-4 py-2 rounded ${
+                  selectedTest === "kelancaran"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
+                onClick={() => setSelectedTest("kelancaran")}
+              >
+                Kelancaran
+              </button>
+            </div>
+            {selectedTest && (
+              <div className="mt-3 p-3 border border-gray-300 rounded bg-gray-50 whitespace-pre-line">
+                {readingMaterials[selectedTest]}
+              </div>
+            )}
+
+            <h3 className="text-lg font-semibold mt-4">Nilai Tes</h3>
             {/* Grid for three test inputs */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
