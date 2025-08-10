@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // This component implements a simple login flow followed by a
 // Quran screening dashboard. After logging in, instructors can
@@ -61,6 +61,37 @@ export default function App() {
       `الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ\n` +
       `مِنَ الْجِنَّةِ وَالنَّاسِ`,
   };
+
+  // Shared reading text fetched from the Quran API. All tests use the same
+  // source (a surah) so that students read the same passage regardless of
+  // which assessment is selected. The text is loaded once when the
+  // component mounts. If the API call fails, a fallback message will be
+  // displayed instead.
+  const [readingText, setReadingText] = useState("");
+
+  useEffect(() => {
+    async function fetchSurah() {
+      try {
+        // Fetch Surah Al-Fatihah (surah number 1) from AlQuran Cloud API
+        const response = await fetch("https://api.alquran.cloud/v1/surah/1");
+        const json = await response.json();
+        if (json.data && json.data.ayahs) {
+          // Join ayahs with newlines for readability
+          const text = json.data.ayahs.map((a) => a.text).join("\n");
+          setReadingText(text);
+        } else {
+          setReadingText(
+            "Bacaan tidak tersedia. Periksa kembali koneksi atau API."
+          );
+        }
+      } catch (err) {
+        setReadingText(
+          "Gagal memuat bacaan dari API. Pastikan Anda terhubung internet."
+        );
+      }
+    }
+    fetchSurah();
+  }, []);
 
   // Simple login handler; for a production app this would
   // authenticate against a backend. Here we just check that
@@ -204,7 +235,7 @@ export default function App() {
             </div>
             {selectedTest && (
               <div className="mt-3 p-3 border border-gray-300 rounded bg-gray-50 whitespace-pre-line">
-                {readingMaterials[selectedTest]}
+                {readingText || "Memuat bacaan..."}
               </div>
             )}
 
