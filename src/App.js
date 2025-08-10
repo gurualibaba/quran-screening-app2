@@ -35,48 +35,38 @@ export default function App() {
   // "makhraj", "tajwid" or "kelancaran" or null when no test is selected.
   const [selectedTest, setSelectedTest] = useState(null);
 
-  // Reading materials for each test. These short surah excerpts can be
-  // replaced with any verses you prefer to use during assessment. They
-  // provide text for students to read so teachers can evaluate their
-  // pronunciation, tajwid and fluency.
-  const readingMaterials = {
-    makhraj: `Bacaan untuk tes Makharijul Huruf:\n\n` +
-      `بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n` +
-      `الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ\n` +
-      `الرَّحْمَٰنِ الرَّحِيمِ\n` +
-      `مَالِكِ يَوْمِ الدِّينِ\n` +
-      `إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ\n` +
-      `اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ\n` +
-      `صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ`,
-    tajwid: `Bacaan untuk tes Tajwid:\n\n` +
-      `قُلْ هُوَ اللَّهُ أَحَدٌ\n` +
-      `اللَّهُ الصَّمَدُ\n` +
-      `لَمْ يَلِدْ وَلَمْ يُولَدْ\n` +
-      `وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ`,
-    kelancaran: `Bacaan untuk tes Kelancaran:\n\n` +
-      `قُلْ أَعُوذُ بِرَبِّ النَّاسِ\n` +
-      `مَلِكِ النَّاسِ\n` +
-      `إِلَٰهِ النَّاسِ\n` +
-      `مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ\n` +
-      `الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ\n` +
-      `مِنَ الْجِنَّةِ وَالنَّاسِ`,
-  };
 
-  // Shared reading text fetched from the Quran API. All tests use the same
-  // source (a surah) so that students read the same passage regardless of
-  // which assessment is selected. The text is loaded once when the
-  // component mounts. If the API call fails, a fallback message will be
-  // displayed instead.
+  // Daftar surah dari API Al-Qur'an dan surah yang dipilih untuk bacaan.
+  const [surahList, setSurahList] = useState([]);
+  const [selectedSurah, setSelectedSurah] = useState("1");
   const [readingText, setReadingText] = useState("");
 
+  // Ambil daftar surah (nama dan nomor) saat komponen dimuat pertama kali
+  useEffect(() => {
+    async function fetchSurahList() {
+      try {
+        const response = await fetch("https://api.alquran.cloud/v1/surah");
+        const json = await response.json();
+        if (json.data) {
+          setSurahList(json.data);
+        }
+      } catch (err) {
+        // Jika gagal, biarkan surahList kosong; UI akan menampilkan pesan default
+        setSurahList([]);
+      }
+    }
+    fetchSurahList();
+  }, []);
+
+  // Ambil teks surah setiap kali surah yang dipilih berubah
   useEffect(() => {
     async function fetchSurah() {
       try {
-        // Fetch Surah Al-Fatihah (surah number 1) from AlQuran Cloud API
-        const response = await fetch("https://api.alquran.cloud/v1/surah/1");
+        const response = await fetch(
+          `https://api.alquran.cloud/v1/surah/${selectedSurah}`
+        );
         const json = await response.json();
         if (json.data && json.data.ayahs) {
-          // Join ayahs with newlines for readability
           const text = json.data.ayahs.map((a) => a.text).join("\n");
           setReadingText(text);
         } else {
@@ -91,7 +81,7 @@ export default function App() {
       }
     }
     fetchSurah();
-  }, []);
+  }, [selectedSurah]);
 
   // Simple login handler; for a production app this would
   // authenticate against a backend. Here we just check that
@@ -196,6 +186,24 @@ export default function App() {
               value={className}
               onChange={(e) => setClassName(e.target.value)}
             />
+
+            {/* Pilihan surah untuk bacaan. Pengajar dapat memilih surah mana yang akan dibaca siswa. */}
+            <h3 className="text-lg font-semibold">Pilih Surah</h3>
+            {surahList.length === 0 ? (
+              <p className="text-sm text-gray-500">Memuat daftar surah...</p>
+            ) : (
+              <select
+                className="w-full p-2 border border-gray-300 rounded"
+                value={selectedSurah}
+                onChange={(e) => setSelectedSurah(e.target.value)}
+              >
+                {surahList.map((surah) => (
+                  <option key={surah.number} value={String(surah.number)}>
+                    {surah.number}. {surah.englishName}
+                  </option>
+                ))}
+              </select>
+            )}
             {/* Test selection allows instructors to present reading material for each assessment type. */}
             <h3 className="text-lg font-semibold">Pilih Tes</h3>
             <div className="flex flex-wrap gap-2">
