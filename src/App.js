@@ -67,7 +67,11 @@ export default function App() {
         );
         const json = await response.json();
         if (json.data && json.data.ayahs) {
-          const text = json.data.ayahs.map((a) => a.text).join("\n");
+          // Sertakan nomor ayat dan beri jarak pemisah antar ayat. Dua baris kosong
+          // mempermudah pembacaan dan membedakan setiap ayat secara jelas.
+          const text = json.data.ayahs
+            .map((a) => `${a.numberInSurah}. ${a.text}`)
+            .join("\n\n");
           setReadingText(text);
         } else {
           setReadingText(
